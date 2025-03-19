@@ -1,0 +1,3 @@
+[submodule "tuyacpp"]
+	path = lib/tuyacpp
+	url = https://github.com/hgrf/tuyacpp.git
