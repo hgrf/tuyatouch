@@ -16,3 +16,5 @@
 
 #define TP_RST 13
 #define TP_INT 14
+
+#define BUZZER 33
