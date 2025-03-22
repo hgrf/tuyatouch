@@ -19,3 +19,7 @@
 
 #define BUZZER 33
 #define SYS_EN 35
+#define VOLTAGE_DIVIDER 1
+#define VREF 3.3                 // Power supply voltage of ESP32-S3 (unit: volts)
+#define R1 200000.0              // Resistance value of the first resistor (unit: ohms)
+#define R2 100000.0              // Resistance value of the second resistor (unit: ohms)

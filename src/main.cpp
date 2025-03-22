@@ -28,6 +28,8 @@ static lv_disp_draw_buf_t draw_buf;
 tuya::Loop l;
 std::unique_ptr<tuya::Scanner> s;
 
+static lv_obj_t *battery_label;
+
 #define EXAMPLE_LVGL_TICK_PERIOD_MS 2
 
 /* Display flushing */
@@ -72,6 +74,7 @@ void example_increase_lvgl_tick(void *arg) {
 void setup() {
   pinMode(BUZZER, OUTPUT);
   pinMode(SYS_EN, OUTPUT);
+  pinMode(VOLTAGE_DIVIDER, INPUT);
 
   tone(BUZZER, 1000);
   delay(200);
@@ -137,6 +140,9 @@ void setup() {
     }, LV_EVENT_CLICKED, dev.get());
   }
 
+  battery_label = lv_label_create(cont_col);
+  lv_label_set_text(battery_label, "Initializing...");
+
   const esp_timer_create_args_t lvgl_tick_timer_args = {
     .callback = &example_increase_lvgl_tick,
     .name = "lvgl_tick"
@@ -159,6 +165,12 @@ void setup() {
 }
 
 void loop() {
+  uint16_t adc_val = analogRead(VOLTAGE_DIVIDER);
+  float voltage = (float)adc_val * (VREF / 4095.0);
+  float vbat = voltage * ((R1 + R2) / R2);
+  String voltage_str = "Battery voltage: " + String(vbat) + " V";
+  lv_label_set_text(battery_label, voltage_str.c_str());
+
   l.loop(100);
   lv_timer_handler();
 }
