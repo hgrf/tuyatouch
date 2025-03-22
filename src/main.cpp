@@ -29,6 +29,7 @@ tuya::Loop l;
 std::unique_ptr<tuya::Scanner> s;
 
 static lv_obj_t *battery_label;
+static lv_obj_t *wifi_label;
 
 #define EXAMPLE_LVGL_TICK_PERIOD_MS 2
 
@@ -143,6 +144,9 @@ void setup() {
   battery_label = lv_label_create(cont_col);
   lv_label_set_text(battery_label, "Initializing...");
 
+  wifi_label = lv_label_create(cont_col);
+  lv_label_set_text(wifi_label, "Initializing...");
+
   const esp_timer_create_args_t lvgl_tick_timer_args = {
     .callback = &example_increase_lvgl_tick,
     .name = "lvgl_tick"
@@ -155,13 +159,6 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   std::cout << "Connecting to the WiFi network" << std::endl;
-
-  while(WiFi.status() != WL_CONNECTED){
-      delay(100);
-  }
-
-  std::cout << "Connected to the WiFi network" << std::endl;
-  std::cout << "IP Address: " << WiFi.localIP().toString().c_str() << std::endl;
 }
 
 void loop() {
@@ -170,6 +167,21 @@ void loop() {
   float vbat = voltage * ((R1 + R2) / R2);
   String voltage_str = "Battery voltage: " + String(vbat) + " V";
   lv_label_set_text(battery_label, voltage_str.c_str());
+
+  switch (WiFi.status()) {
+    case WL_CONNECTED:
+      lv_label_set_text(wifi_label, "WiFi connected");
+      break;
+    case WL_NO_SHIELD:
+    case WL_IDLE_STATUS:
+    case WL_NO_SSID_AVAIL:
+    case WL_SCAN_COMPLETED:
+    case WL_CONNECT_FAILED:
+    case WL_CONNECTION_LOST:
+    case WL_DISCONNECTED:
+      lv_label_set_text(wifi_label, "WiFi disconnected");
+      break;
+  }
 
   l.loop(100);
   lv_timer_handler();
