@@ -71,10 +71,12 @@ void example_increase_lvgl_tick(void *arg) {
 
 void setup() {
   pinMode(BUZZER, OUTPUT);
+  pinMode(SYS_EN, OUTPUT);
 
   tone(BUZZER, 1000);
   delay(200);
   noTone(BUZZER);
+  digitalWrite(SYS_EN, HIGH);
 
   while (CST816T->begin() == false) {
     std::cout << "CST816T initialization fail" << std::endl;

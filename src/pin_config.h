@@ -18,3 +18,4 @@
 #define TP_INT 14
 
 #define BUZZER 33
+#define SYS_EN 35
