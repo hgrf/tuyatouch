@@ -1,5 +1,5 @@
-#include <Arduino_DriveBus_Library.h>
 #include <Arduino_GFX_Library.h>
+#include <CST816S.h>
 #include <lvgl.h>
 #include <tuyacpp/scanner.hpp>
 #include <WiFi.h>
@@ -11,15 +11,7 @@
 Arduino_DataBus *bus = new Arduino_ESP32SPI(LCD_DC, LCD_CS, LCD_SCK, LCD_MOSI);
 Arduino_GFX *gfx = new Arduino_ST7789(bus, LCD_RST, 0, true, LCD_WIDTH, LCD_HEIGHT, 0, 20, 0, 0);
 
-void Arduino_IIC_Touch_Interrupt(void);
-
-std::shared_ptr<Arduino_IIC_DriveBus> IIC_Bus =
-  std::make_shared<Arduino_HWIIC>(IIC_SDA, IIC_SCL, &Wire);
-std::unique_ptr<Arduino_IIC> CST816T(new Arduino_CST816x(IIC_Bus, CST816T_DEVICE_ADDRESS, TP_RST, TP_INT, Arduino_IIC_Touch_Interrupt));
-
-void Arduino_IIC_Touch_Interrupt(void) {
-  CST816T->IIC_Interrupt_Flag = true;
-}
+CST816S touch(IIC_SDA, IIC_SCL, TP_RST, TP_INT);
 
 uint32_t screenWidth;
 uint32_t screenHeight;
@@ -48,20 +40,17 @@ void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color
   }
 
 void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
-  int32_t touchX = CST816T->IIC_Read_Device_Value(CST816T->Arduino_IIC_Touch::Value_Information::TOUCH_COORDINATE_X);
-  int32_t touchY = CST816T->IIC_Read_Device_Value(CST816T->Arduino_IIC_Touch::Value_Information::TOUCH_COORDINATE_Y);
-
-  if (CST816T->IIC_Interrupt_Flag == true) {
-    CST816T->IIC_Interrupt_Flag = false;
+  if (touch.available()) {
     data->state = LV_INDEV_STATE_PR;
 
-    /* Set the coordinates with some debounce */
-    if (touchX >= 0 && touchY >= 0) {
-      data->point.x = touchX;
-      data->point.y = touchY;
+    data->point.x = touch.data.x;
+    data->point.y = touch.data.y;
 
-      std::cout << "Data x: " << touchX << ", Data y: " << touchY << std::endl;
-    }
+    std::cout << "Data x: " << touch.data.x << ", Data y: " << touch.data.y << std::endl;
+
+    tone(BUZZER, 1000);
+    delay(20);
+    noTone(BUZZER);
   } else {
     data->state = LV_INDEV_STATE_REL;
   }
@@ -82,14 +71,7 @@ void setup() {
   noTone(BUZZER);
   digitalWrite(SYS_EN, HIGH);
 
-  while (CST816T->begin() == false) {
-    std::cout << "CST816T initialization fail" << std::endl;
-    delay(1000);
-  }
-  std::cout << "CST816T initialization successfully" << std::endl;
-
-  CST816T->IIC_Write_Device_State(CST816T->Arduino_IIC_Touch::Device::TOUCH_DEVICE_INTERRUPT_MODE,
-                                  CST816T->Arduino_IIC_Touch::Device_Mode::TOUCH_DEVICE_INTERRUPT_PERIODIC);
+  touch.begin();
 
   gfx->begin();
   pinMode(LCD_BL, OUTPUT);
