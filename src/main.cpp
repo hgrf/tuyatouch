@@ -165,6 +165,8 @@ void loop() {
       break;
   }
 
-  l.loop(10);
+  if (WiFi.status() == WL_CONNECTED) {
+    l.loop(10);
+  }
   lv_timer_handler();
 }
