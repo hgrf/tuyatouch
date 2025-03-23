@@ -165,6 +165,6 @@ void loop() {
       break;
   }
 
-  l.loop(100);
+  l.loop(10);
   lv_timer_handler();
 }
