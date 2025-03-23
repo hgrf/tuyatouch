@@ -23,6 +23,8 @@ std::unique_ptr<tuya::Scanner> s;
 static lv_obj_t *battery_label;
 static lv_obj_t *wifi_label;
 
+static uint32_t loop_counter = 0;
+
 #define EXAMPLE_LVGL_TICK_PERIOD_MS 2
 
 /* Display flushing */
@@ -144,29 +146,38 @@ void setup() {
 }
 
 void loop() {
-  uint16_t adc_val = analogRead(VOLTAGE_DIVIDER);
-  float voltage = (float)adc_val * (VREF / 4095.0);
-  float vbat = voltage * ((R1 + R2) / R2);
-  String voltage_str = "Battery voltage: " + String(vbat) + " V";
-  lv_label_set_text(battery_label, voltage_str.c_str());
+  uint32_t t0 = millis();
+  uint32_t dt;
+  if (loop_counter++ % 50 == 0) {
+    uint16_t adc_val = analogRead(VOLTAGE_DIVIDER);
+    float voltage = (float)adc_val * (VREF / 4095.0);
+    float vbat = voltage * ((R1 + R2) / R2);
+    String voltage_str = "Battery voltage: " + String(vbat) + " V";
+    lv_label_set_text(battery_label, voltage_str.c_str());
 
-  switch (WiFi.status()) {
-    case WL_CONNECTED:
-      lv_label_set_text(wifi_label, "WiFi connected");
-      break;
-    case WL_NO_SHIELD:
-    case WL_IDLE_STATUS:
-    case WL_NO_SSID_AVAIL:
-    case WL_SCAN_COMPLETED:
-    case WL_CONNECT_FAILED:
-    case WL_CONNECTION_LOST:
-    case WL_DISCONNECTED:
-      lv_label_set_text(wifi_label, "WiFi disconnected");
-      break;
+    switch (WiFi.status()) {
+      case WL_CONNECTED:
+        lv_label_set_text(wifi_label, "WiFi connected");
+        break;
+      case WL_NO_SHIELD:
+      case WL_IDLE_STATUS:
+      case WL_NO_SSID_AVAIL:
+      case WL_SCAN_COMPLETED:
+      case WL_CONNECT_FAILED:
+      case WL_CONNECTION_LOST:
+      case WL_DISCONNECTED:
+        lv_label_set_text(wifi_label, "WiFi disconnected");
+        break;
+    }
   }
 
   if (WiFi.status() == WL_CONNECTED) {
     l.loop(10);
   }
   lv_timer_handler();
+
+  dt = millis() - t0;
+  if (dt < 10) {
+    delay(10 - dt);
+  }
 }
