@@ -229,6 +229,7 @@ void setup() {
   if (wifi_config_loaded) {
     WiFi.mode(WIFI_STA);
     WiFi.begin(wifi_ssid.c_str(), wifi_password.c_str());
+    WiFi.setTxPower(WIFI_POWER_8_5dBm);
   }
 }
 
