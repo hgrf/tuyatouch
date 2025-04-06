@@ -1,6 +1,6 @@
 #pragma once
 
-#define XPOWERS_CHIP_AXP2101
+#ifdef BOARD_WAVESHARE_1_69
 
 #define LCD_DC 4
 #define LCD_CS 5
@@ -23,3 +23,16 @@
 #define VREF 3.3                 // Power supply voltage of ESP32-S3 (unit: volts)
 #define R1 200000.0              // Resistance value of the first resistor (unit: ohms)
 #define R2 100000.0              // Resistance value of the second resistor (unit: ohms)
+
+#endif
+
+#ifdef BOARD_WAVESHARE_4_3
+
+#define SD_MOSI 11
+#define SD_CLK  12
+#define SD_MISO 13
+#define SD_SS -1
+
+#define SD_CS 4
+
+#endif
