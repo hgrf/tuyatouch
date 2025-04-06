@@ -33,6 +33,4 @@
 #define SD_MISO 13
 #define SD_SS -1
 
-#define SD_CS 4
-
 #endif

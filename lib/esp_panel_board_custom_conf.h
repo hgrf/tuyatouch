@@ -343,9 +343,13 @@
  */
 #define ESP_PANEL_BOARD_EXPANDER_POST_BEGIN_FUNCTION(p) \
     {  \
+        constexpr int SD_CS = 4; \
+        constexpr int USB_SEL = 5; \
         auto board = static_cast<Board *>(p);  \
         auto expander = static_cast<esp_expander::CH422G*>(board->getIO_Expander()->getBase()); \
         expander->enableAllIO_Output(); \
+        expander->digitalWrite(SD_CS, 0); \
+        expander->digitalWrite(USB_SEL, 0); \
         return true;    \
     }
 
